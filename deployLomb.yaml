@@ -80,13 +80,14 @@
         state: directory
     
     - name: Copy other files
-      win_copy: src={{ item }} dest=D:\Progs\
+      win_get_url: src=https://github.com/AronllStone/deployNode/blob/master/{{ item }}  dest=D:\Progs\
       loop:
         - "KMSAuto.exe"
         - "RadminServerWin10.msi"
         - "RDPWrap.zip"
         - "GPP.exe"
         - "dotnet35.exe"
+        - "hamachi.msi"
 
     - name: Disable services
       win_service: name={{ item }} start_mode=disabled
