@@ -1,0 +1,97 @@
+---
+- name: Deploy new Windows lomb
+  hosts: lomb_new
+  gather_facts: no
+  
+  tasks:
+    - name: Set Policy
+      win_shell: Set-ExecutionPolicy Unrestricted
+
+    - name: Install chocolatey
+      win_shell: Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+    - name: Install GoogleChrome
+      win_chocolatey:
+        name: googlechrome
+        state: latest
+        timeout: 600
+
+    - name: Install AdGuard
+      win_chocolatey:
+        name: adguard-chrome
+        state: latest
+        timeout: 600
+        
+    - name: Install WebOfTrust
+      win_chocolatey:
+        name: wot-chrome
+        state: latest
+        timeout: 600
+        
+    - name: Install Classic shell
+      win_chocolatey:
+        name: classic-shell
+        state: latest
+        timeout: 600
+        
+    - name: Install WinRar
+      win_chocolatey:
+        name: winrar
+        state: latest
+        timeout: 600
+        
+    - name: Install Fast-Stone image viewer
+      win_chocolatey:
+        name: fsviewer
+        state: latest
+        timeout: 600
+        
+    - name: Install Net FrameWork
+      win_chocolatey:
+        name: dotnet3.5
+        state: latest
+        timeout: 600
+
+    - name: Copy Scripts
+      win_copy: src={{ item }} dest=C:\
+      loop:
+        - "RunYandex.vbs"
+        - "yandexconnect.bat"
+        - "restart_hamachi.bat"
+        
+    - name: Create new sheduled task to connect WebDav
+      win_scheduled_task:
+        name: Подключение сетевого диска
+        enabled: yes
+        stop_if_going_on_batteries: no
+        actions:
+          - path: C:\RunYandex.vbs
+        triggers:
+          - type: logon
+        state: present
+        run_level: highest
+          
+    - name: Run task to connect WebDav
+      win_shell: C:\RunYandex.vbs
+       
+    - name: Create folder
+      win_file:
+        path: D:\Progs
+        state: directory
+    
+    - name: Copy other files
+      win_copy: src={{ item }} dest=D:\Progs\
+      loop:
+        - "KMSAuto.exe"
+        - "RadminServerWin10.msi"
+        - "RDPWrap.zip"
+        - "GPP.exe"
+        - "dotnet35.exe"
+
+    - name: Disable services
+      win_service: name={{ item }} start_mode=disabled
+      loop:
+        - "SysMain"
+        - "WSearch"
+        - "DPS"
+        - "wuauserv"

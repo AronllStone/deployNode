@@ -1,0 +1,5 @@
+[lomb_new]
+13 ansible_host=10.10.0.13
+
+[windows:children]
+lomb_new
