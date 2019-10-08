@@ -3,6 +3,9 @@
   hosts: lomb_new
   gather_facts: no
   
+  vars:
+     hostname: Lomb1-3
+  
   tasks:
     - name: Set Policy
       win_shell: Set-ExecutionPolicy Unrestricted
@@ -53,7 +56,7 @@
         timeout: 600
 
     - name: Copy Scripts
-      win_copy: src={{ item }} dest=C:\
+      win_get_url: url=https://github.com/AronllStone/deployNode/blob/master/{{ item }}  dest=C:\
       loop:
         - "RunYandex.vbs"
         - "yandexconnect.bat"
@@ -72,7 +75,7 @@
         run_level: highest
           
     - name: Run task to connect WebDav
-      win_shell: C:\RunYandex.vbs
+      win_shell: schtasks /run /tn "Подключение сетевого диска"
        
     - name: Create folder
       win_file:
@@ -80,7 +83,7 @@
         state: directory
     
     - name: Copy other files
-      win_get_url: src=https://github.com/AronllStone/deployNode/blob/master/{{ item }}  dest=D:\Progs\
+      win_get_url: url=https://github.com/AronllStone/deployNode/blob/master/{{ item }}  dest=D:\Progs\
       loop:
         - "KMSAuto.exe"
         - "RadminServerWin10.msi"
@@ -88,6 +91,7 @@
         - "GPP.exe"
         - "dotnet35.exe"
         - "hamachi.msi"
+        - "ssh.zip"
 
     - name: Disable services
       win_service: name={{ item }} start_mode=disabled
@@ -96,3 +100,21 @@
         - "WSearch"
         - "DPS"
         - "wuauserv"
+
+    - name: Change the hostname to sample-hostname
+      win_hostname:
+        name: {{ hostnane }}
+
+    - name: Unzip ssh archive
+      win_unzip:
+        src: D:\Progs\ssh.zip
+        dest: D:\Progs\ssh\
+        creates: D:\Progs\ssh\
+        recurse: yes
+        
+    - name: Unzip RDWrap archive
+      win_unzip:
+        src: D:\Progs\RDWrap.zip
+        dest: D:\Progs\RDWrap\
+        creates: D:\Progs\RDWrap\
+        recurse: yes
