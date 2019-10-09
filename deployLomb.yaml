@@ -105,12 +105,12 @@
         
     - name: Install ssh
       win_shell: cd 'C:\Program Files (x86)\ssh' ; .\install-sshd.ps1
-      
+
     - name: Make ssh dir for user
       win_file:
         path: C:\Users\Jarviz\.ssh
         state: directory
-      
+
     - name: Copy authorize key
       win_copy:
         src: ../.ssh/id_rsa.pub
@@ -118,9 +118,24 @@
         
     - name: Fix user permissions to file
       win_shell: cd 'C:\Program Files (x86)\ssh' ; .\FixUserFilePermissions.ps1
-      
+
     - name: Start ssh services
       win_service: name={{ item }} state=started start_mode=auto
       loop:
         - "ssh-agent"
         - "sshd"
+
+    - name: Add Shortcut rdp on Desktop
+      win_shortcut:
+        src: R:\Bce\1c.rdp
+        dest: C:\Users\Public\Desktop\1C.lnk
+
+    - name: Add Shortcut rdp hamachi on Desktop
+      win_shortcut:
+        src: R:\Bce\1c ПЕСОЧНИЦА.rdp
+        dest: C:\Users\Public\Desktop\1c ПЕСОЧНИЦА.lnk
+
+    - name: Add shortcut hamachiRestart on desktop
+      win_shortcut:
+        src: C:\restart_hamachi.bat
+        dest: C:\Users\Public\Desktop\restart_hamachi.lnk
