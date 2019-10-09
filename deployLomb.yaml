@@ -139,3 +139,6 @@
       win_shortcut:
         src: C:\restart_hamachi.bat
         dest: C:\Users\Public\Desktop\restart_hamachi.lnk
+
+    - name: Reboot node
+      win_reboot:
