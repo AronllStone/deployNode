@@ -2,10 +2,7 @@
 - name: Deploy new Windows lomb
   hosts: lomb_new
   gather_facts: no
-  
-  vars:
-     hostname: Lomb1-3
-  
+
   tasks:
     - name: Set Policy
       win_shell: Set-ExecutionPolicy Unrestricted
@@ -48,15 +45,9 @@
         name: fsviewer
         state: latest
         timeout: 600
-        
-    - name: Install Net FrameWork
-      win_chocolatey:
-        name: dotnet3.5
-        state: latest
-        timeout: 600
 
     - name: Copy Scripts
-      win_get_url: url=https://github.com/AronllStone/deployNode/blob/master/{{ item }}  dest=C:\
+      win_copy: src={{ item }}  dest=C:\
       loop:
         - "RunYandex.vbs"
         - "yandexconnect.bat"
@@ -83,7 +74,7 @@
         state: directory
     
     - name: Copy other files
-      win_get_url: url=https://github.com/AronllStone/deployNode/blob/master/{{ item }}  dest=D:\Progs\
+      win_copy: src={{ item }}  dest=D:\Progs\
       loop:
         - "KMSAuto.exe"
         - "RadminServerWin10.msi"
@@ -92,6 +83,7 @@
         - "dotnet35.exe"
         - "hamachi.msi"
         - "ssh.zip"
+      ignore_errors: yes
 
     - name: Disable services
       win_service: name={{ item }} start_mode=disabled
@@ -101,20 +93,34 @@
         - "DPS"
         - "wuauserv"
 
-    - name: Change the hostname to sample-hostname
-      win_hostname:
-        name: {{ hostnane }}
-
     - name: Unzip ssh archive
       win_unzip:
         src: D:\Progs\ssh.zip
-        dest: D:\Progs\ssh\
-        creates: D:\Progs\ssh\
-        recurse: yes
+        dest: C:\Program Files (x86)\
         
     - name: Unzip RDWrap archive
       win_unzip:
-        src: D:\Progs\RDWrap.zip
-        dest: D:\Progs\RDWrap\
-        creates: D:\Progs\RDWrap\
-        recurse: yes
+        src: D:\Progs\RDPWrap.zip
+        dest: D:\Progs\RDPWrap\
+        
+    - name: Install ssh
+      win_shell: cd 'C:\Program Files (x86)\ssh' ; .\install-sshd.ps1
+      
+    - name: Make ssh dir for user
+      win_file:
+        path: C:\Users\Jarviz\.ssh
+        state: directory
+      
+    - name: Copy authorize key
+      win_copy:
+        src: ../.ssh/id_rsa.pub
+        dest: C:\Users\Jarviz\.ssh\authorized_keys
+        
+    - name: Fix user permissions to file
+      win_shell: cd 'C:\Program Files (x86)\ssh' ; .\FixUserFilePermissions.ps1
+      
+    - name: Start ssh services
+      win_service: name={{ item }} state=started start_mode=auto
+      loop:
+        - "ssh-agent"
+        - "sshd"
