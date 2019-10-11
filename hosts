@@ -1,5 +1,6 @@
 [lomb_new]
-13 ansible_host=10.10.0.13
+#13 ansible_host=10.10.0.13
+test ansible_host=192.168.122.204
 
 [windows:children]
 lomb_new
